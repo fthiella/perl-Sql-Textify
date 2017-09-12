@@ -10,7 +10,7 @@ use Data::Dumper;
 
 =head1 NAME
 
-Sql::Textify - Runs SQL queries and get the result in text format (markdown, html)
+Sql::Textify - Run SQL queries and get the result in text format (markdown, html)
 
 =head1 VERSION
 
