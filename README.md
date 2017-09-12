@@ -10,17 +10,6 @@ Version 0.01
 
 ## SYNOPSIS
 
-    use Sql::Textify 'textify';
-    my $text = textify( $sql );
-
-    use Sql::Textify 'textify';
-    my $text = textify( $sql, {
-        conn => 'dbi:connection:string',
-        username => 'username',
-        password => 'password',
-        format => 'markdown',
-    } );
-
     use Sql::Textify;
     my $t = Sql::Textify->new;
     my $text = $t->textify( $sql );
