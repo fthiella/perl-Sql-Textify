@@ -1,15 +1,12 @@
 #!/usr/bin/perl
 
-# SQL Markdown Builder
-# https://github.com/fthiella/Sql-mk-builder
-
 =head1 NAME
 
-sqlbuild.pl - Perl SQL Markdown Builder
+sqltextify.pl - Shell interface to SQL::Textify, run a SQL query and get the result in text format (markdown, html, csv)
 
 =head1 SYNOPSIS
 
-sqlbuild.pl --sql=query.sql --conn="dbi:SQLite:dbname=test.sqlite3" --username=admin --password=pass
+    sqltextify.pl --sql=query.sql --conn="dbi:SQLite:dbname=test.sqlite3" --username=admin --password=pass
 
 =head1 DESCRIPTION
 
@@ -41,8 +38,49 @@ use Getopt::Long;
 use utf8;
 use Sql::Textify;
 
-our $VERSION = "1.10";
-our $RELEASEDATE = "September 1st, 2017";
+our $VERSION = "0.01";
+our $RELEASEDATE = "September 10th, 2017";
+
+=head1 OPTIONS
+
+sqltextify.pl supports a number of command line options which control
+the behaviour of the output document.
+
+The options are:
+
+=over
+
+=item source, s
+
+source SQL file
+
+=item conn, c
+
+DBI connection string
+
+=item username, u
+
+Specify the database username.
+
+=item password, p
+
+Specify the database password.
+
+=item maxwidth, mw
+
+Set a maximum width for the columns when in markdown format mode. If any column contains
+a string longer than maxwidth it will be cropped.
+
+=item format, f
+
+Output format (markdown default, html)
+
+=item layout, l
+
+Output layout (table default, record)
+
+=back
+=cut
 
 # CLI Interface
 
@@ -56,16 +94,17 @@ Options:
   -c, --conn        specify DBI connection string
   -u, --username    specify username
   -p, --password    specify password
-  -mw, --maxwidth   maximum width column (if unspecified get from actual data)
+  -mw, --maxwidth   maximum width column for markdown (if unspecified get from actual data)
   -f, --format      output format (markdown -default- or html)
   -l, --layout      output layout (table -default- or record)
+  -v, --version     show current version
 
 Project GitHub page: https://github.com/fthiella/Sql-mk-builder
 endhelp
 }
 
 sub do_version {
-	print "Sql-mk-builder $VERSION ($RELEASEDATE)\n";
+	print "sqltextify $VERSION ($RELEASEDATE)\n";
 }
 
 # added utf8 support
@@ -112,8 +151,7 @@ die "Please specfy sql source with -s or -sql\n" unless ($source);
 # read the input file
 my $sql = read_file($source);
 
-# get the connection parameters from source sql file (command line will take precedence)
-# the regexp is over-simplified but should work on most cases
+# FIXME: over simplified regex, and also need to decide which parameter has to take precedence, the command line or the C-comment?
 
 unless ($conn)     { ($conn) = $sql =~ /conn=\"([^\""]*)\"\s/; }
 unless ($username) { ($username) = $sql =~ /username=\"([^\""]*)\"\s/; }
@@ -129,7 +167,9 @@ unless ($layout)   { $layout = 'table';   }
 my $dbh = DBI->connect($conn, $username, $password)
 || die $DBI::errstr;
 
-foreach my $sql_query (split /;\n/, $sql) {
+# FIXME is foreach needed? textify will process multiple queries already
+
+foreach my $sql_query (split /;\s*/, $sql) {
 	# remove comments from sql_query (some drivers will remove automatically but other will throw an error)
 	# (simple regex, it will work only on simplest cases, please see http://learn.perl.org/faq/perlfaq6.html#How-do-I-use-a-regular-expression-to-strip-C-style-comments-from-a-file)
 	$sql_query =~ s/\/\*.*?\*\///gs;

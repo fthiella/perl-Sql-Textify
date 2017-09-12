@@ -10,7 +10,7 @@ use Data::Dumper;
 
 =head1 NAME
 
-Sql::Textify - Run a SQL query and get the result in text format (markdown, html, csv)
+Sql::Textify - Runs SQL queries and get the result in text format (markdown, html)
 
 =head1 VERSION
 
@@ -50,9 +50,9 @@ our @EXPORT_OK = qw(textify);
 
 =head1 SYNTAX
 
-This module executes SQL queries and produces a text output (markdown, html, csv).
-Connection details, username and password can be specified in a C++ style comment
-inside the SQL query:
+This module executes SQL queries and produces text output (markdown, html).
+Connection details, username and password can be specified in a C-style multiline
+comment inside the SQL query:
 
     /*
         conn="dbi:SQLite:dbname=test.sqlite3"
@@ -84,7 +84,7 @@ The options for the processor are:
 
 =item format
 
-markdown (default), html, csv
+markdown (default), html
 
 =item layout
 
@@ -121,12 +121,10 @@ sub new {
 	my ($class, %p) = @_;
 	my $self = {};
 
-	#(($self->{format}) = (($p{format} || "markdown") =~ /^(markdown|html)$/)) || croak("valore $p{format} errato.");
-
 	$self->{format} = sanitize_string({ value => $p{format}, regexp => 'html|markdown', default => 'markdown' });
 	$self->{layout} = sanitize_string({ value => $p{layout}, regexp => 'table|record',  default => 'table' });
 
-	$self->{username} = $p{username}; # FIXME: if undefined, will this end up being defined? need to check...
+	$self->{username} = $p{username};
 	$self->{password} = $p{password};
 	$self->{conn} = $p{conn};
 
@@ -145,7 +143,6 @@ sub textify {
 	my ( $self, $sql ) = @_;
 
 	$self->_GetParametersFromSql($sql);
-
 	$self->{dbh} = DBI->connect($self->{conn}, $self->{username}, $self->{password}) || die $DBI::errstr;
 
 	return $self->_Textify($sql);
@@ -155,7 +152,7 @@ sub _GetParametersFromSql {
 	my ($self, $sql) = @_;
 
 	# FIXME: values from SQL string will take precedence
-	# FIXME: the regexp is over-simplified (but should work on most cases)
+	# FIXME: the following regexps will usually work on most cases, but are over-simplified
 
 	if ($sql =~ /conn=\"([^\""]*)\"\s/)     { $self->{conn} = $1;     }
 	if ($sql =~ /username=\"([^\""]*)\"\s/) { $self->{username} = $1; }
@@ -186,8 +183,8 @@ sub _Textify {
 	my $result;
 
 	foreach my $sql_query (split /;\s*/, $sql) {
-		# remove comments from sql_query (some drivers will remove comments automatically but other will throw an error)
-		# (simple regex, it will work only on simplest cases, please see http://learn.perl.org/faq/perlfaq6.html#How-do-I-use-a-regular-expression-to-strip-C-style-comments-from-a-file)
+		# FIXME: over simplified regexp to remove comments from sql_query (some drivers will remove comments automatically but other will throw an error)
+		# (fix with this? http://learn.perl.org/faq/perlfaq6.html#How-do-I-use-a-regular-expression-to-strip-C-style-comments-from-a-file)
 		$sql_query =~ s/\/\*.*?\*\///gs;
 
 		my $records = $self->_Do_Sql($sql_query);
@@ -388,6 +385,7 @@ sub sanitize_string {
 }
 
 sub quote_markdown {
+	# there's not a standard way to quote markdown
 	my $s = shift;
 
 	if ($s) {
