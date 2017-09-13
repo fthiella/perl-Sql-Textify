@@ -10,12 +10,9 @@ sqltextify.pl - Shell interface to SQL::Textify, run a SQL query and get the res
 
 =head1 DESCRIPTION
 
-I like text editors, I have fallen in love with Sublime Text,
-and everything I write is in Markdown syntax!
-
-This simple Perl sript executes SQL queries and produces
-Markdown output. It can be easily integrated with Sublime Text
-editor, but it can also be used at the command line.
+sqltextify.pl is a shell interface to SQL::Textify, it will run one or more SQL queries and will return the result
+in various text formats (Markdown and HTML at the moment, both using a table layout or a record layout).
+This can be used at the command line or can be easily integrated with Sublime Text.
 
 =head1 LICENSE
 
@@ -38,7 +35,7 @@ use Getopt::Long;
 use utf8;
 use Sql::Textify;
 
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 our $RELEASEDATE = "September 13th, 2017";
 
 =head1 OPTIONS
@@ -167,23 +164,14 @@ unless ($layout)   { $layout = 'table';   }
 my $dbh = DBI->connect($conn, $username, $password)
 || die $DBI::errstr;
 
-# FIXME is foreach needed? textify will process multiple queries already
 
-foreach my $sql_query (split /;\s*/, $sql) {
-	# remove comments from sql_query (some drivers will remove automatically but other will throw an error)
-	# (simple regex, it will work only on simplest cases, please see http://learn.perl.org/faq/perlfaq6.html#How-do-I-use-a-regular-expression-to-strip-C-style-comments-from-a-file)
-	$sql_query =~ s/\/\*.*?\*\///gs;
+my $t = new Sql::Textify(
+	conn => $conn,
+	username => $username,
+	password => $password,
+	maxwidth => $maxwidth,
+	format => $format,
+	layout => $layout
+);
 
-	my $t = new Sql::Textify(
-		conn => $conn,
-		username => $username,
-		password => $password,
-		maxwidth => $maxwidth,
-		format => $format,
-		layout => $layout
-	);
-
-	print $t->textify($sql_query);
-}
-
-print "\n";
+print $t->textify($sql), "\n";

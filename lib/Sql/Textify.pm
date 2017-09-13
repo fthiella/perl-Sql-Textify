@@ -13,11 +13,11 @@ Sql::Textify - Run SQL queries and get the result in text format (markdown, html
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 $VERSION = eval $VERSION;
 our @EXPORT_OK = qw(textify);
 
@@ -170,11 +170,12 @@ sub _Textify {
 
 	my $result;
 
-	foreach my $sql_query (split /;\s*/, $sql) {
-		# FIXME: over simplified regexp to remove comments from sql_query (some drivers will remove comments automatically but other will throw an error)
-		# (fix with this? http://learn.perl.org/faq/perlfaq6.html#How-do-I-use-a-regular-expression-to-strip-C-style-comments-from-a-file)
-		$sql_query =~ s/\/\*.*?\*\///gs;
+	# strip C-style comments from source query
+	# regexp from http://learn.perl.org/faq/perlfaq6.html#How-do-I-use-a-regular-expression-to-strip-C-style-comments-from-a-file
 
+	$sql =~ s#/\*[^*]*\*+([^/*][^*]*\*+)*/|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#defined $2 ? $2 : ""#gse;
+
+	foreach my $sql_query (split /;\s*/, $sql) {
 		my $records = $self->_Do_Sql($sql_query);
 		$result .= $self->_Do_Format($records);
  	}
