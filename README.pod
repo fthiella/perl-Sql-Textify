@@ -4,10 +4,7 @@ Sql::Textify - Run SQL queries and get the result in text format (markdown, html
 
 =head1 VERSION
 
-Version 0.02
-
-
-=cut
+Version 0.04
 
 =head1 SYNOPSIS
 
@@ -91,16 +88,10 @@ a string longer than maxwidth it will be cropped.
 
 Sql::Textify constructor, see OPTIONS sections for more information.
 
-
-=cut
-
 =head2 textify
 
 The main function as far as the outside world is concerned. See the SYNTAX
 for details on use.
-
-
-=cut
 
 =head1 AUTHOR
 
@@ -188,7 +179,4 @@ CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
 CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-
-=cut
 

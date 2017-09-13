@@ -1,15 +1,10 @@
-package Sql::Textify::Test::Class;
-
-use Test::Class::Most;
 use strict;
 use warnings;
-use Sql::Textify;
-use File::Temp;
+use Test::More tests => 11;
 
-sub records_for_tests {
-  my ($self) = shift;
+use_ok( 'Sql::Textify' );
 
-  my $test_ref = [
+my $test_ref = [
   # Simple Recordset
     {
       name => 'Simple Recordset',
@@ -209,143 +204,17 @@ quotes \'"\|space                     | <h1></h1>
         },
       ]
     },
-  ];
+];
 
-  return $test_ref;
+
+my $t     = Sql::Textify->new;
+
+foreach my $test (@{ $test_ref }) {
+
+    foreach my $result (@{ $test->{results} }) {
+        $t->{format} = $result->{format}[0];
+        $t->{layout} = $result->{format}[1];
+
+        is( $t->_Do_Format($test->{data}), $result->{text}, "Test name=$test->{name}, format=$result->{format}[0], layout=$result->{format}[1]");
+    }
 }
-
-sub content_for_tests {
-    my ($self, $want) = @_;
-
-    my $simple_src = <<SIMPLE;
-/*
-  conn="dbi:SQLite:dbname=tmp/samples.db"
-  username="username"
-  password="password"
-*/
-select 'first' as one, 'second' as two
-SIMPLE
-
-    my $simple_markdown = <<SIMPLE_MARKDOWN;
-
-one   | two   
-------|-------
-first | second
-SIMPLE_MARKDOWN
-
-    my $simple_markdown_record = <<SIMPLE_MARKDOWN_RECORD;
-# Record 1
-
-Column | Value 
--------|-------
-one    | first 
-two    | second
-
-SIMPLE_MARKDOWN_RECORD
-
-    my $simple_html = <<SIMPLE_HTML;
-<table>
-<thead>
-  <th>one</th>
-  <th>two</th>
-</thead>
-<tbody>
-<tr>
-  <td>first</td>
-  <td>second</td>
-</tr>
-</tbody>
-</table>
-
-SIMPLE_HTML
-
-    my $simple_html_record = <<SIMPLE_HTML_RECORD;
-<h1>Record 1</h1>
-
-<table>
-<tr>
-  <th>one</th>
-  <td>first</td>
-</tr>
-<tr>
-  <th>two</th>
-  <td>second</td>
-</tr>
-</table>
-
-SIMPLE_HTML_RECORD
-
-    my $max_src = <<SETWIDTH;
-/*
-  conn="dbi:SQLite:dbname=tmp/samples.db"
-  username="username"
-  password="password"
-  maxwidth="1"
-*/
-select 'first' as one, 'second' as two
-SETWIDTH
-
-    my $max_markdown = <<SETWIDTH_MARKDOWN;
-
-o | t
---|--
-f | s
-SETWIDTH_MARKDOWN
-
-    my $max_markdown_record = <<SETWIDTH_MARKDOWN_RECORD;
-# Record 1
-
-C | V
---|--
-o | f
-t | s
-
-SETWIDTH_MARKDOWN_RECORD
-
-    my $create_src = <<CREATE;
-/*
-  conn="dbi:SQLite:dbname=tmp/samples.db"
-  username="username"
-  password="password"
-  maxwidth="1"
-*/
-drop table if exists test;
-
-create table test (
-  id int,
-  description text
-);
-
-insert into test values
-(1, 'first row'),
-(2, 'second row'),
-(3, 'third row');
-CREATE
-
-
-    my $create_markdown = <<CREATE_MARKDOWN;
-0 rows
-0 rows
-0 rows
-CREATE_MARKDOWN
-
-	my $dir = File::Temp::tempdir( CLEANUP => 1 );
-
-	$simple_src =~ s/\btmp\b/$dir/;
-	$max_src =~ s/\btmp\b/$dir/;
-	$create_src =~ s/\btmp\b/$dir/;
-
-    return $simple_src               if $want eq 'simple';
-    return $simple_markdown          if $want eq 'simple-markdown';
-    return $simple_markdown_record   if $want eq 'simple-markdown-record';
-    return $simple_html              if $want eq 'simple-html';
-    return $simple_html_record       if $want eq 'simple-html-record';
-    return $max_src                  if $want eq 'max';
-    return $max_markdown             if $want eq 'max-markdown';
-    return $max_markdown_record      if $want eq 'max-markdown-record';
-    return $create_src               if $want eq 'create';
-    return $create_markdown          if $want eq 'create-markdown';
-    die "No content for '$want'";
-}
-
-1;

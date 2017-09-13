@@ -18,9 +18,9 @@ WriteMakefile(
     BUILD_REQUIRES => {
         'Test::More' => '0',
     },
-    TEST_REQUIRES => {
-        'Test::Class::Most' => '0',
-    },
+#    TEST_REQUIRES => {
+#        'Test::Class::Most' => '0',
+#    },
     PREREQ_PM => {
         'DBI' => '0',
         'HTML::Entities' => '0',
