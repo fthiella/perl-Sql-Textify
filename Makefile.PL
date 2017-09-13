@@ -18,9 +18,12 @@ WriteMakefile(
     BUILD_REQUIRES => {
         'Test::More' => '0',
     },
+    TEST_REQUIRES => {
+        'Test::Class::Most' => '0',
+    },
     PREREQ_PM => {
-        #'ABC'              => '1.6',
-        #'Foo::Bar::Module' => '5.0401',
+        'DBI' => '0',
+        'HTML::Entities' => '0',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Sql-Textify-*' },

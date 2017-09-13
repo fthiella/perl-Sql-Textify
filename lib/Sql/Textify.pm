@@ -6,7 +6,6 @@ use warnings;
 use Carp qw(croak);
 use DBI;
 use HTML::Entities;
-use Data::Dumper;
 
 =head1 NAME
 
@@ -14,11 +13,11 @@ Sql::Textify - Run SQL queries and get the result in text format (markdown, html
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 $VERSION = eval $VERSION;
 our @EXPORT_OK = qw(textify);
 
@@ -226,25 +225,22 @@ sub _Do_Sql_Markdown {
 			foreach my $i (0 .. (scalar @{ $row }-1)) {
 				$width[$i] = max($width[$i], length(quote_markdown($row->[$i])));
 			}
-			# then "strip" the width to the $max_width
-			@width = map { min($_, $max_width) } @width;
 		}
+		# then "strip" the width to the $max_width
+		@width = map { min($_, $max_width) } @width;
 
 		# create format string
-		my $f = join ' | ', map { "%-".$_.$max_format."s"} @width;
+		my $f = join(' | ', map { "%-".$_.$max_format."s"} @width) . "\n";
 
 		# print header
-		$result .= "\n";
-		$result .= sprintf $f, map { quote_markdown($_) } @{$records->{fields}};
-		$result .= "\n";
+		$result .= "\n" . sprintf( $f, map { quote_markdown($_) } @{$records->{fields}} );
 
 		# print sub header -|-
 		$result .= join("-|-", map { '-'x$_ } @width ) . "\n";
 
 		# print rows
 		foreach my $row (@{ $records->{rows} }) {
-			$result .= sprintf $f, map { quote_markdown($_) } @{$row};
-			$result .= "\n";
+			$result .= sprintf( $f, map { quote_markdown($_) } @{$row} );
 		}
 	} else {
 		$result .= "0 rows\n";
@@ -282,16 +278,14 @@ sub _Do_Sql_Markdown_Record {
 		$width[1] = min($width[1], $max_width);
 
 		# %-x.ys    %s string, - left-justify, x minimum widht, y maximum width
-		my $f = join ' | ', map { "%-".$_.$max_format."s"} @width;
+		my $f = join(' | ', map { "%-".$_.$max_format."s"} @width) . "\n";
 
 		$result .= sprintf $f, ("Column", "Value");
 
-		$result .= "\n";
 		$result .= '-'x$width[0] . '-|-' . '-'x$width[1] . "\n";
 
 		foreach my $i (0 .. (scalar @{ $row }-1)) {
 				$result .= sprintf $f, (quote_markdown($records->{fields}[$i]), quote_markdown($row->[$i]));
-				$result .= "\n";
 		}
 
 		$result .= "\n";

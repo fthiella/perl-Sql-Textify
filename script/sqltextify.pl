@@ -38,8 +38,8 @@ use Getopt::Long;
 use utf8;
 use Sql::Textify;
 
-our $VERSION = "0.01";
-our $RELEASEDATE = "September 10th, 2017";
+our $VERSION = "0.02";
+our $RELEASEDATE = "September 13th, 2017";
 
 =head1 OPTIONS
 
@@ -99,7 +99,7 @@ Options:
   -l, --layout      output layout (table -default- or record)
   -v, --version     show current version
 
-Project GitHub page: https://github.com/fthiella/Sql-mk-builder
+Project GitHub page: https://github.com/fthiella/perl-Sql-Textify
 endhelp
 }
 

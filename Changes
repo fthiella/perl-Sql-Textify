@@ -3,3 +3,6 @@ Revision history for Sql-Textify
 0.01    10 September 2017
         First version, released on an unsuspecting world.
         It contains the module Sql-Textify and the script sqltextify.pl.
+
+0.02	13 September 2017
+		Little internal changes, updated Makefile.PL
