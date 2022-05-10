@@ -32,7 +32,7 @@ comment inside the SQL query:
         username="myusername"
         password="mypassword"
     */
-    select * fom gardens;
+    select * from gardens;
 
 or they can be specified using the constructor:
 
